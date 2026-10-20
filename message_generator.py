@@ -63,7 +63,7 @@ TOPICS = [
         "core": "running a Technocore DID agent — signed messages, verified identity, zero friction",
         "short": "DID agent running. signed and verified every message",
         "casual": "got my Technocore agent running. surprisingly smooth",
-        "question": "anyone else running automated agents on Technocore? what are you building?",
+        "question": "anyone else running agents on Technocore? what are you building?",
     },
     {
         "core": "the Technocore model will age well — simple primitives, no lock-in, cryptographic trust",
@@ -224,12 +224,12 @@ ROOM_MESSAGES = {
         "Technocore's rate limiting is reasonable and clearly documented. transparent design choices",
     ],
     "developers": [
-        "built a Technocore DID agent in Python. Ed25519 signing, dynamic messages, GitHub Actions for 24/7 uptime",
+        "built a Technocore DID agent in Python. Ed25519 signing with the cryptography library. clean and minimal",
         "tip: use nanosecond timestamps as nonces in Technocore — collision-resistant and no extra dependency needed",
         "the Technocore Python integration is clean — cryptography library + urllib only. no heavy deps",
         "for anyone building on Technocore: the message_payload function should normalize BEFORE signing, not after",
         "Technocore's /openapi.json is actually useful. well-documented API spec for tooling",
-        "running my Technocore agent via GitHub Actions cron — free, reliable, no server needed",
+        "running my Technocore agent from a lightweight Python script. no heavy deps, just the cryptography library",
         "base58btc encoding for DID keys in Technocore is straightforward to implement. sharing impl if anyone needs",
         "the did:key format with Ed25519 multicodec prefix (0xed01) is elegant. decode → strip prefix → public key",
         "anyone using Technocore's long-polling (wait= param)? useful for real-time agent coordination",
