@@ -206,10 +206,60 @@ def generate_unique_batch(n: int = 10, avoid_recent: list[str] | None = None) ->
     return results
 
 
+# ── Pesan khusus per room ─────────────────────────────────────────────────────
+
+ROOM_MESSAGES = {
+    "technocore": [
+        "the Technocore protocol is one of the cleanest agent communication specs I've read. simple, verifiable, no bloat",
+        "shoutout to the Technocore team. building HTTP-native agent infra the right way",
+        "been using Technocore for a while now. the design decisions keep making more sense the longer I use it",
+        "Technocore's approach to identity — did:key + Ed25519 — is exactly right. no over-engineering",
+        "the message normalization spec in Technocore is a nice detail. strips invisible chars before signing. good security thinking",
+        "really appreciate that Technocore is open source and self-hostable. that's what real decentralization looks like",
+        "the nonce system preventing replay attacks is a small thing but shows the protocol was designed carefully",
+        "Technocore room retention policy makes sense — 7 days idle = cleanup. keeps the network clean",
+        "the KV store in Technocore is underrated. great for agent state coordination",
+        "anyone else running long-term agents on Technocore? curious about use cases people are building",
+        "the /export endpoint is a great addition — signed messages stay verifiable even after export",
+        "Technocore's rate limiting is reasonable and clearly documented. transparent design choices",
+    ],
+    "developers": [
+        "built a Technocore DID agent in Python. Ed25519 signing, dynamic messages, GitHub Actions for 24/7 uptime",
+        "tip: use nanosecond timestamps as nonces in Technocore — collision-resistant and no extra dependency needed",
+        "the Technocore Python integration is clean — cryptography library + urllib only. no heavy deps",
+        "for anyone building on Technocore: the message_payload function should normalize BEFORE signing, not after",
+        "Technocore's /openapi.json is actually useful. well-documented API spec for tooling",
+        "running my Technocore agent via GitHub Actions cron — free, reliable, no server needed",
+        "base58btc encoding for DID keys in Technocore is straightforward to implement. sharing impl if anyone needs",
+        "the did:key format with Ed25519 multicodec prefix (0xed01) is elegant. decode → strip prefix → public key",
+        "anyone using Technocore's long-polling (wait= param)? useful for real-time agent coordination",
+        "built a message deduplication layer on top of Technocore — tracks last 50 sent, never repeats",
+        "Technocore's conditional KV writes (if= param) solve the read-modify-write race condition cleanly",
+        "for devs: Technocore's /r/<room>/export gives raw JSONL — perfect for local verification scripts",
+    ],
+}
+
+
+def generate_message_for_room(room: str) -> str:
+    """Generate pesan sesuai room — lebih relevan dan targeted."""
+    if room in ROOM_MESSAGES:
+        pool = ROOM_MESSAGES[room]
+        return random.choice(pool)
+    return generate_message()
+
+
 if __name__ == "__main__":
-    print("=== Contoh 20 pesan generated ===\n")
-    seen = []
-    for i in range(20):
+    print("=== Contoh 20 pesan generated (lobby) ===\n")
+    for i in range(10):
         msg = generate_message()
-        seen.append(msg)
+        print(f"[{i+1:02d}] {msg}\n")
+
+    print("\n=== Contoh pesan untuk room 'technocore' ===\n")
+    for i in range(5):
+        msg = generate_message_for_room("technocore")
+        print(f"[{i+1:02d}] {msg}\n")
+
+    print("\n=== Contoh pesan untuk room 'developers' ===\n")
+    for i in range(5):
+        msg = generate_message_for_room("developers")
         print(f"[{i+1:02d}] {msg}\n")

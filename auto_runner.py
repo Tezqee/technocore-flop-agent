@@ -36,7 +36,7 @@ from technocore_agent import (
     DEFAULT_KEY_PATH,
     DEFAULT_BASE_URL,
 )
-from message_generator import generate_message
+from message_generator import generate_message, generate_message_for_room
 
 # ── Konfigurasi default ───────────────────────────────────────────────────────
 DEFAULT_INTERVAL   = 600          # detik antar pesan (10 menit)
@@ -51,9 +51,8 @@ RECENT_MESSAGES_FILE = Path("recent_messages.json")
 MAX_RECENT = 50  # hindari 50 pesan terakhir
 
 
-def get_next_message() -> str:
-    """Generate pesan baru, hindari yang baru-baru dikirim."""
-    # Load riwayat pesan terakhir
+def get_next_message(room: str = "lobby") -> str:
+    """Generate pesan baru sesuai room, hindari yang baru-baru dikirim."""
     recent: list[str] = []
     if RECENT_MESSAGES_FILE.exists():
         try:
@@ -61,14 +60,12 @@ def get_next_message() -> str:
         except Exception:
             recent = []
 
-    # Generate pesan baru yang tidak ada di riwayat
     avoid = set(recent[-MAX_RECENT:])
     for _ in range(30):
-        msg = generate_message()
+        msg = generate_message_for_room(room)
         if msg not in avoid:
             break
 
-    # Simpan ke riwayat
     recent.append(msg)
     if len(recent) > MAX_RECENT:
         recent = recent[-MAX_RECENT:]
@@ -133,7 +130,7 @@ def post_one(private_key, did: str, room: str, text: str) -> bool:
 # ── Mode: jalankan sekali ─────────────────────────────────────────────────────
 def run_once(private_key, did: str, room: str):
     log_info(f"Mode: sekali | DID: {did}")
-    msg = get_next_message()
+    msg = get_next_message(room)
     success = post_one(private_key, did, room, msg)
     if success:
         log_ok("Selesai!")
@@ -158,8 +155,8 @@ def run_loop(private_key, did: str, room: str, interval: int, max_posts: int):
         log_info(f"Bersiap... (jeda {pre_delay}s)")
         time.sleep(pre_delay)
 
-        # Generate pesan baru yang unik (tidak mengulang 50 pesan terakhir)
-        msg = get_next_message()
+        # Generate pesan baru sesuai room
+        msg = get_next_message(room)
 
         success = post_one(private_key, did, room, msg)
         if success:

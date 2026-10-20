@@ -1,19 +1,26 @@
-name: Technocore Auto Runner — $FLOP Airdrop
+name: Technocore Auto Runner — Multi Room
 
 on:
   schedule:
-    # Random-ish: jalan tiap jam tapi di menit ke 7, 23, 41, 57
-    # (tidak tepat jam, lebih natural)
-    - cron: '7 */3 * * *'    # tiap 3 jam di menit ke-7
-    - cron: '23 1-23/4 * * *' # tiap 4 jam di menit ke-23
+    # lobby     → tiap 3 jam di menit ke-17 (natural, tidak tepat jam)
+    - cron: '17 */3 * * *'
+    # technocore → tiap 6 jam di menit ke-43
+    - cron: '43 */6 * * *'
+    # developers → tiap 12 jam di menit ke-31
+    - cron: '31 */12 * * *'
   workflow_dispatch:
-    # Bisa juga dijalankan manual dari GitHub
+    inputs:
+      room:
+        description: 'Room tujuan (lobby / technocore / developers)'
+        required: false
+        default: 'lobby'
 
 jobs:
-  post-message:
-    name: Post Signed Message to Technocore
+  post-lobby:
+    name: Post to lobby
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule')
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -28,25 +35,152 @@ jobs:
       - name: Install dependencies
         run: pip install cryptography==50.0.0
 
-      - name: Random human-like delay
+      - name: Human-like random delay
         run: |
-          DELAY=$((RANDOM % 300 + 30))
-          echo "Waiting ${DELAY}s before posting (human-like timing)..."
+          DELAY=$((RANDOM % 240 + 30))
+          echo "Waiting ${DELAY}s before posting..."
           sleep $DELAY
 
-      - name: Restore identity.pem from secret
+      - name: Restore identity.pem
         run: |
           echo "${{ secrets.IDENTITY_PEM_B64 }}" | base64 -d > identity.pem
           chmod 600 identity.pem
-          echo "identity.pem restored ($(wc -c < identity.pem) bytes)"
 
-      - name: Post message to Technocore
+      - name: Post to #lobby
         env:
           TECHNOCORE_PASS: ${{ secrets.TECHNOCORE_PASS }}
           PYTHONIOENCODING: utf-8
-        run: |
-          python auto_runner.py --once --room lobby
+        run: python auto_runner.py --once --room lobby
 
       - name: Show log
         if: always()
-        run: cat auto_runner.log 2>/dev/null || echo "No log file"
+        run: cat auto_runner.log 2>/dev/null || echo "No log"
+
+      - name: Cleanup
+        if: always()
+        run: rm -f identity.pem
+
+  post-technocore:
+    name: Post to technocore
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # Jalan di jadwal cron ke-2 (tiap 6 jam)
+    # GitHub tidak ada cara native filter cron, jadi pakai needs + conditional
+
+    steps:
+      - name: Check if this is the 6h schedule
+        id: check
+        run: |
+          MINUTE=$(date -u +%-M)
+          HOUR=$(date -u +%-H)
+          # Menit ke-43 = jadwal technocore
+          if [ "$MINUTE" -ge 40 ] && [ "$MINUTE" -le 46 ]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout repository
+        if: steps.check.outputs.should_run == 'true'
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python 3.12
+        if: steps.check.outputs.should_run == 'true'
+        uses: actions/setup-python@v5.3.0
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        if: steps.check.outputs.should_run == 'true'
+        run: pip install cryptography==50.0.0
+
+      - name: Human-like random delay
+        if: steps.check.outputs.should_run == 'true'
+        run: |
+          DELAY=$((RANDOM % 180 + 60))
+          echo "Waiting ${DELAY}s..."
+          sleep $DELAY
+
+      - name: Restore identity.pem
+        if: steps.check.outputs.should_run == 'true'
+        run: |
+          echo "${{ secrets.IDENTITY_PEM_B64 }}" | base64 -d > identity.pem
+          chmod 600 identity.pem
+
+      - name: Post to #technocore
+        if: steps.check.outputs.should_run == 'true'
+        env:
+          TECHNOCORE_PASS: ${{ secrets.TECHNOCORE_PASS }}
+          PYTHONIOENCODING: utf-8
+        run: python auto_runner.py --once --room technocore
+
+      - name: Show log
+        if: always()
+        run: cat auto_runner.log 2>/dev/null || echo "No log"
+
+      - name: Cleanup
+        if: always()
+        run: rm -f identity.pem
+
+  post-developers:
+    name: Post to developers
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Check if this is the 12h schedule
+        id: check
+        run: |
+          MINUTE=$(date -u +%-M)
+          # Menit ke-31 = jadwal developers
+          if [ "$MINUTE" -ge 28 ] && [ "$MINUTE" -le 34 ]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout repository
+        if: steps.check.outputs.should_run == 'true'
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python 3.12
+        if: steps.check.outputs.should_run == 'true'
+        uses: actions/setup-python@v5.3.0
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        if: steps.check.outputs.should_run == 'true'
+        run: pip install cryptography==50.0.0
+
+      - name: Human-like random delay
+        if: steps.check.outputs.should_run == 'true'
+        run: |
+          DELAY=$((RANDOM % 120 + 30))
+          echo "Waiting ${DELAY}s..."
+          sleep $DELAY
+
+      - name: Restore identity.pem
+        if: steps.check.outputs.should_run == 'true'
+        run: |
+          echo "${{ secrets.IDENTITY_PEM_B64 }}" | base64 -d > identity.pem
+          chmod 600 identity.pem
+
+      - name: Post to #developers
+        if: steps.check.outputs.should_run == 'true'
+        env:
+          TECHNOCORE_PASS: ${{ secrets.TECHNOCORE_PASS }}
+          PYTHONIOENCODING: utf-8
+        run: python auto_runner.py --once --room developers
+
+      - name: Show log
+        if: always()
+        run: cat auto_runner.log 2>/dev/null || echo "No log"
+
+      - name: Cleanup
+        if: always()
+        run: rm -f identity.pem
