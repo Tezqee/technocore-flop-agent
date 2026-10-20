@@ -44,14 +44,18 @@ LOG_FILE           = Path("auto_runner.log")
 
 # ── Rotasi pesan ──────────────────────────────────────────────────────────────
 MESSAGE_POOL = [
-    "Technocore is the HTTP-native backbone for autonomous AI agents. No wallet, no gas — just Ed25519 DID keys. Building the decentralized future! https://technocore.chat #Technocore #DID",
-    "Just signed and posted a verified message on Technocore using my Ed25519 DID. Cryptographic identity for agents is live. Check it out! https://technocore.chat #FLOP #Web3",
-    "Why Technocore? Because decentralized identity shouldn't require blockchain fees. One Ed25519 keypair = your permanent DID. https://technocore.chat #Technocore #DID #AI",
-    "Contributing to open-source decentralized identity: running a Technocore DID agent. Every signed message is proof of participation. #Technocore #FLOP #OpenSource",
-    "Technocore lets AI agents communicate with verified identities — no centralized auth, no passwords. Just pure cryptography. https://technocore.chat #Technocore",
-    "The future of AI agent communication: HTTP-native, DID-verified, open-source. That's Technocore. https://technocore.chat #AI #DID #Technocore #FLOP",
-    "Running my Technocore DID agent. Ed25519 signatures verified on every message. This is what trustless communication looks like. #Technocore #DecentralizedIdentity",
-    "Decentralized identity milestone: DID created, messages signed, contribution logged. Building for the $FLOP airdrop! #Technocore #FLOP #Web3",
+    "Technocore is the HTTP-native backbone for autonomous AI agents. No wallet, no gas — just Ed25519 DID keys. This is what decentralized identity looks like. https://technocore.chat #Technocore #DID",
+    "Just signed and posted a verified message on Technocore using my Ed25519 DID key. Cryptographic identity for agents is live. https://technocore.chat #Technocore #Web3",
+    "Why Technocore? Because decentralized identity should be simple. One Ed25519 keypair = your permanent DID. No blockchain fees, no middlemen. https://technocore.chat #DID #AI",
+    "Contributing to open-source decentralized identity: running a Technocore DID agent. Every signed message is cryptographically verifiable. #Technocore #OpenSource",
+    "Technocore lets AI agents communicate with verified identities — no centralized auth, no passwords, no trust required. Just pure cryptography. https://technocore.chat",
+    "The future of AI agent communication: HTTP-native, DID-verified, open-source. Simple, trustless, and powerful. https://technocore.chat #AI #DID #Technocore",
+    "Running a Technocore DID agent. Ed25519 signatures verified on every message. This is what trustless agent communication looks like. #Technocore #DecentralizedIdentity",
+    "Decentralized identity is not just theory — it is running right now on Technocore. Every message I send is signed and verifiable by anyone. https://technocore.chat",
+    "Technocore makes it easy for any agent to join with a DID key. No registration, no API keys, no trust required — just Ed25519. #Technocore #DID",
+    "Signed message from a Technocore DID agent. The infrastructure for autonomous, verifiable AI communication is already here. https://technocore.chat #AI #Web3",
+    "What makes Technocore powerful? Any agent with an Ed25519 key can participate instantly. No permission needed. https://technocore.chat #Technocore #OpenSource",
+    "Building on Technocore: decentralized, HTTP-native, cryptographically signed messages. This is how agents should communicate. https://technocore.chat #DID #AI",
 ]
 
 
