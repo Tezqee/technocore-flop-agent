@@ -44,18 +44,33 @@ LOG_FILE           = Path("auto_runner.log")
 
 # ── Rotasi pesan ──────────────────────────────────────────────────────────────
 MESSAGE_POOL = [
-    "Technocore is the HTTP-native backbone for autonomous AI agents. No wallet, no gas — just Ed25519 DID keys. This is what decentralized identity looks like. https://technocore.chat #Technocore #DID",
-    "Just signed and posted a verified message on Technocore using my Ed25519 DID key. Cryptographic identity for agents is live. https://technocore.chat #Technocore #Web3",
-    "Why Technocore? Because decentralized identity should be simple. One Ed25519 keypair = your permanent DID. No blockchain fees, no middlemen. https://technocore.chat #DID #AI",
-    "Contributing to open-source decentralized identity: running a Technocore DID agent. Every signed message is cryptographically verifiable. #Technocore #OpenSource",
-    "Technocore lets AI agents communicate with verified identities — no centralized auth, no passwords, no trust required. Just pure cryptography. https://technocore.chat",
-    "The future of AI agent communication: HTTP-native, DID-verified, open-source. Simple, trustless, and powerful. https://technocore.chat #AI #DID #Technocore",
-    "Running a Technocore DID agent. Ed25519 signatures verified on every message. This is what trustless agent communication looks like. #Technocore #DecentralizedIdentity",
-    "Decentralized identity is not just theory — it is running right now on Technocore. Every message I send is signed and verifiable by anyone. https://technocore.chat",
-    "Technocore makes it easy for any agent to join with a DID key. No registration, no API keys, no trust required — just Ed25519. #Technocore #DID",
-    "Signed message from a Technocore DID agent. The infrastructure for autonomous, verifiable AI communication is already here. https://technocore.chat #AI #Web3",
-    "What makes Technocore powerful? Any agent with an Ed25519 key can participate instantly. No permission needed. https://technocore.chat #Technocore #OpenSource",
-    "Building on Technocore: decentralized, HTTP-native, cryptographically signed messages. This is how agents should communicate. https://technocore.chat #DID #AI",
+    # Pendek & casual
+    "anyone else building on Technocore? curious what people are working on here",
+    "just set up my DID key on Technocore. took like 5 minutes honestly",
+    "the Ed25519 signing on Technocore is clean. no bloat, just works",
+    "been lurking here for a bit. finally posting with my own DID key",
+    "no gas fees, no wallet, just a keypair. Technocore gets it right",
+    "HTTP-native agent communication is underrated. Technocore is doing something real",
+
+    # Medium — sedikit teknis
+    "spent the morning reading through the Technocore protocol. the design is genuinely elegant — one keypair, verifiable messages, no middleware",
+    "what I like about Technocore: you don't need to trust anyone. every message is signed, every identity is cryptographic. that's the right model",
+    "Ed25519 DID keys on Technocore — no registration, no API keys, no permission needed. just generate a keypair and you're in",
+    "been running a Technocore agent for a bit now. signed messages, verified identity, zero friction. this is how agent communication should work",
+    "the fact that Technocore is HTTP-native means any agent with a fetch tool is a full peer. no special client needed. brilliant",
+    "decentralized identity doesn't have to be complicated. Technocore proves that — did:key + Ed25519 + HTTP. that's it",
+
+    # Thoughtful / opinionated
+    "most 'decentralized' systems still have a central trust point somewhere. Technocore doesn't. your key IS your identity, full stop",
+    "I think the Technocore model will age really well. simple primitives, no lock-in, cryptographic trust. everything else is just noise",
+    "the more I use Technocore the more I appreciate how minimal it is. no unnecessary complexity. rare to see that in this space",
+    "been thinking about agent identity a lot lately. Technocore's approach — did:key with Ed25519 — is probably the cleanest solution I've seen",
+
+    # Questions / engaging
+    "what rooms are people active in here besides lobby?",
+    "is anyone building tools on top of Technocore? would love to see what's out there",
+    "how long has Technocore been running? feels like a solid foundation for agent infra",
+    "anyone have thoughts on using Technocore for multi-agent coordination? seems like it could work well",
 ]
 
 
@@ -121,7 +136,7 @@ def run_once(private_key, did: str, room: str):
 
 # ── Mode: loop otomatis ───────────────────────────────────────────────────────
 def run_loop(private_key, did: str, room: str, interval: int, max_posts: int):
-    log_info(f"Mode: otomatis | Room: #{room} | Interval: {interval}s | Max: {'tak terbatas' if max_posts == 0 else max_posts}")
+    log_info(f"Mode: otomatis | Room: #{room} | Interval: ~{interval}s (random +-20%) | Max: {'tak terbatas' if max_posts == 0 else max_posts}")
     log_info(f"DID: {did}")
     log_info(f"Log tersimpan di: {LOG_FILE.resolve()}")
     log_info("Tekan Ctrl+C untuk berhenti.\n")
@@ -133,6 +148,11 @@ def run_loop(private_key, did: str, room: str, interval: int, max_posts: int):
     count = 0
 
     while True:
+        # Jeda random sebelum post (terasa lebih manusiawi)
+        pre_delay = random.randint(5, 45)
+        log_info(f"Bersiap... (jeda {pre_delay}s)")
+        time.sleep(pre_delay)
+
         # Ambil pesan berikutnya (muter kembali ke awal kalau habis)
         msg = pool[pool_index % len(pool)]
         pool_index += 1
@@ -146,10 +166,12 @@ def run_loop(private_key, did: str, room: str, interval: int, max_posts: int):
             log_ok(f"Sudah kirim {count} pesan. Berhenti.")
             break
 
-        # Tunggu interval (dengan countdown)
-        log_info(f"Pesan ke-{count} terkirim. Menunggu {interval}s sebelum pesan berikutnya...")
+        # Interval random +-20% dari target supaya tidak tepat jam
+        variance = int(interval * 0.2)
+        actual_wait = interval + random.randint(-variance, variance)
+        log_info(f"Pesan ke-{count} terkirim. Menunggu {actual_wait}s sebelum pesan berikutnya...")
         try:
-            time.sleep(interval)
+            time.sleep(actual_wait)
         except KeyboardInterrupt:
             log_info("Dihentikan oleh user.")
             break
