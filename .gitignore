@@ -1,0 +1,17 @@
+# Virtual environment — jangan di-push, terlalu besar
+.venv/
+
+# Identity key — RAHASIA, jangan pernah di-push!
+identity.pem
+.tc_config
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Log files
+auto_runner.log
+
+# VS Code local settings
+.vscode/settings.json

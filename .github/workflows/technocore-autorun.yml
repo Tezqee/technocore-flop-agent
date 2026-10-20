@@ -1,0 +1,44 @@
+name: Technocore Auto Runner — $FLOP Airdrop
+
+on:
+  schedule:
+    # Jalankan setiap 1 jam (24/7, tanpa PC perlu nyala)
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    # Bisa juga dijalankan manual dari GitHub
+
+jobs:
+  post-message:
+    name: Post Signed Message to Technocore
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install cryptography==50.0.0
+
+      - name: Restore identity.pem from secret
+        run: |
+          echo "${{ secrets.IDENTITY_PEM_B64 }}" | base64 -d > identity.pem
+          chmod 600 identity.pem
+          echo "identity.pem restored ($(wc -c < identity.pem) bytes)"
+
+      - name: Post message to Technocore
+        env:
+          TECHNOCORE_PASS: ${{ secrets.TECHNOCORE_PASS }}
+          PYTHONIOENCODING: utf-8
+        run: |
+          python auto_runner.py --once --room lobby
+
+      - name: Show log
+        if: always()
+        run: cat auto_runner.log 2>/dev/null || echo "No log file"

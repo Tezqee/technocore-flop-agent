@@ -1,0 +1,26 @@
+{
+  "recommendations": [
+    // ── Python core ───────────────────────────────────────────────────────────
+    "ms-python.python",           // Python language support
+    "ms-python.pylance",          // Fast IntelliSense & type checking
+    "ms-python.black-formatter",  // Auto-format with Black
+    "charliermarsh.ruff",         // Blazing-fast linter
+
+    // ── API & HTTP testing (Technocore HTTP API) ──────────────────────────────
+    "humao.rest-client",          // .http files to test API endpoints
+    "rangav.vscode-thunder-client", // GUI Postman-like client inside VS Code
+
+    // ── Git & GitHub ──────────────────────────────────────────────────────────
+    "eamodio.gitlens",            // Rich Git history & blame annotations
+    "github.vscode-github-actions", // YAML syntax + validation for Actions
+
+    // ── Security & code quality ───────────────────────────────────────────────
+    "nhoizey.gremlins",           // Flag invisible/unusual Unicode characters
+    "aaron-bond.better-comments", // Colour-coded TODO / WARNING / ! comments
+
+    // ── Developer experience ──────────────────────────────────────────────────
+    "mikestead.dotenv",           // Syntax highlight for .env files
+    "redhat.vscode-yaml",         // YAML schema validation (Actions, configs)
+    "ms-vscode.makefile-tools"    // Makefile IntelliSense & run targets
+  ]
+}

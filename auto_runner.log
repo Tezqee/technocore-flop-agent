@@ -1,0 +1,22 @@
+[2026-10-20 16:27:53] [INFO ] Membuka identity dari: D:\Project\flop tezqee\identity.pem
+[2026-10-20 16:27:53] [ERROR] Gagal buka identity: incorrect passphrase or invalid encrypted identity
+[2026-10-20 16:27:53] [ERROR] Cek passphrase di TECHNOCORE_PASS sudah benar.
+[2026-10-20 16:28:03] [INFO ] Membuka identity dari: D:\Project\flop tezqee\identity.pem
+[2026-10-20 16:28:03] [ERROR] Gagal buka identity: incorrect passphrase or invalid encrypted identity
+[2026-10-20 16:28:03] [ERROR] Cek passphrase di TECHNOCORE_PASS sudah benar.
+[2026-10-20 16:30:06] [INFO ] Membuka identity dari: D:\Project\flop tezqee\identity.pem
+[2026-10-20 16:30:06] [OK   ] Identity berhasil dibuka!
+[2026-10-20 16:30:06] [OK   ] DID: did:key:z6MkrQwxhQH2kowiCxudRntfrdJHCFPMh5Q7QNBMMH7yWN3V
+[2026-10-20 16:30:06] [INFO ] Mode: sekali | DID: did:key:z6MkrQwxhQH2kowiCxudRntfrdJHCFPMh5Q7QNBMMH7yWN3V
+[2026-10-20 16:30:08] [OK   ] Terkirim ke #lobby | seq=115632328 | Decentralized identity milestone: DID created, messages sign...
+[2026-10-20 16:30:08] [OK   ] Selesai!
+[2026-10-20 16:31:59] [INFO ] Membuka identity dari: D:\Project\flop tezqee\identity.pem
+[2026-10-20 16:31:59] [OK   ] Identity berhasil dibuka!
+[2026-10-20 16:31:59] [OK   ] DID: did:key:z6MkrQwxhQH2kowiCxudRntfrdJHCFPMh5Q7QNBMMH7yWN3V
+[2026-10-20 16:31:59] [INFO ] Mode: otomatis | Room: #lobby | Interval: 600s | Max: tak terbatas
+[2026-10-20 16:31:59] [INFO ] DID: did:key:z6MkrQwxhQH2kowiCxudRntfrdJHCFPMh5Q7QNBMMH7yWN3V
+[2026-10-20 16:31:59] [INFO ] Log tersimpan di: D:\Project\flop tezqee\auto_runner.log
+[2026-10-20 16:31:59] [INFO ] Tekan Ctrl+C untuk berhenti.
+
+[2026-10-20 16:31:59] [OK   ] Terkirim ke #lobby | seq=115635817 | Just signed and posted a verified message on Technocore usin...
+[2026-10-20 16:31:59] [INFO ] Pesan ke-1 terkirim. Menunggu 600s sebelum pesan berikutnya...
