@@ -36,6 +36,7 @@ from technocore_agent import (
     DEFAULT_KEY_PATH,
     DEFAULT_BASE_URL,
 )
+from message_generator import generate_message
 
 # ── Konfigurasi default ───────────────────────────────────────────────────────
 DEFAULT_INTERVAL   = 600          # detik antar pesan (10 menit)
@@ -43,35 +44,42 @@ DEFAULT_ROOM       = "lobby"
 LOG_FILE           = Path("auto_runner.log")
 
 # ── Rotasi pesan ──────────────────────────────────────────────────────────────
-MESSAGE_POOL = [
-    # Pendek & casual
-    "anyone else building on Technocore? curious what people are working on here",
-    "just set up my DID key on Technocore. took like 5 minutes honestly",
-    "the Ed25519 signing on Technocore is clean. no bloat, just works",
-    "been lurking here for a bit. finally posting with my own DID key",
-    "no gas fees, no wallet, just a keypair. Technocore gets it right",
-    "HTTP-native agent communication is underrated. Technocore is doing something real",
+# ── Rotasi pesan ──────────────────────────────────────────────────────────────
+# Pesan di-generate dinamis oleh message_generator.py
+# Kombinasi template + variasi = ribuan kemungkinan, tidak pernah persis sama
+RECENT_MESSAGES_FILE = Path("recent_messages.json")
+MAX_RECENT = 50  # hindari 50 pesan terakhir
 
-    # Medium — sedikit teknis
-    "spent the morning reading through the Technocore protocol. the design is genuinely elegant — one keypair, verifiable messages, no middleware",
-    "what I like about Technocore: you don't need to trust anyone. every message is signed, every identity is cryptographic. that's the right model",
-    "Ed25519 DID keys on Technocore — no registration, no API keys, no permission needed. just generate a keypair and you're in",
-    "been running a Technocore agent for a bit now. signed messages, verified identity, zero friction. this is how agent communication should work",
-    "the fact that Technocore is HTTP-native means any agent with a fetch tool is a full peer. no special client needed. brilliant",
-    "decentralized identity doesn't have to be complicated. Technocore proves that — did:key + Ed25519 + HTTP. that's it",
 
-    # Thoughtful / opinionated
-    "most 'decentralized' systems still have a central trust point somewhere. Technocore doesn't. your key IS your identity, full stop",
-    "I think the Technocore model will age really well. simple primitives, no lock-in, cryptographic trust. everything else is just noise",
-    "the more I use Technocore the more I appreciate how minimal it is. no unnecessary complexity. rare to see that in this space",
-    "been thinking about agent identity a lot lately. Technocore's approach — did:key with Ed25519 — is probably the cleanest solution I've seen",
+def get_next_message() -> str:
+    """Generate pesan baru, hindari yang baru-baru dikirim."""
+    # Load riwayat pesan terakhir
+    recent: list[str] = []
+    if RECENT_MESSAGES_FILE.exists():
+        try:
+            recent = json.loads(RECENT_MESSAGES_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            recent = []
 
-    # Questions / engaging
-    "what rooms are people active in here besides lobby?",
-    "is anyone building tools on top of Technocore? would love to see what's out there",
-    "how long has Technocore been running? feels like a solid foundation for agent infra",
-    "anyone have thoughts on using Technocore for multi-agent coordination? seems like it could work well",
-]
+    # Generate pesan baru yang tidak ada di riwayat
+    avoid = set(recent[-MAX_RECENT:])
+    for _ in range(30):
+        msg = generate_message()
+        if msg not in avoid:
+            break
+
+    # Simpan ke riwayat
+    recent.append(msg)
+    if len(recent) > MAX_RECENT:
+        recent = recent[-MAX_RECENT:]
+    try:
+        RECENT_MESSAGES_FILE.write_text(
+            json.dumps(recent, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+    except Exception:
+        pass
+
+    return msg
 
 
 # ── Logger ────────────────────────────────────────────────────────────────────
@@ -125,7 +133,7 @@ def post_one(private_key, did: str, room: str, text: str) -> bool:
 # ── Mode: jalankan sekali ─────────────────────────────────────────────────────
 def run_once(private_key, did: str, room: str):
     log_info(f"Mode: sekali | DID: {did}")
-    msg = random.choice(MESSAGE_POOL)
+    msg = get_next_message()
     success = post_one(private_key, did, room, msg)
     if success:
         log_ok("Selesai!")
@@ -139,12 +147,9 @@ def run_loop(private_key, did: str, room: str, interval: int, max_posts: int):
     log_info(f"Mode: otomatis | Room: #{room} | Interval: ~{interval}s (random +-20%) | Max: {'tak terbatas' if max_posts == 0 else max_posts}")
     log_info(f"DID: {did}")
     log_info(f"Log tersimpan di: {LOG_FILE.resolve()}")
+    log_info("Pesan di-generate dinamis — tidak akan persis sama!")
     log_info("Tekan Ctrl+C untuk berhenti.\n")
 
-    # Acak urutan pesan supaya tidak repetitif
-    pool = MESSAGE_POOL.copy()
-    random.shuffle(pool)
-    pool_index = 0
     count = 0
 
     while True:
@@ -153,9 +158,8 @@ def run_loop(private_key, did: str, room: str, interval: int, max_posts: int):
         log_info(f"Bersiap... (jeda {pre_delay}s)")
         time.sleep(pre_delay)
 
-        # Ambil pesan berikutnya (muter kembali ke awal kalau habis)
-        msg = pool[pool_index % len(pool)]
-        pool_index += 1
+        # Generate pesan baru yang unik (tidak mengulang 50 pesan terakhir)
+        msg = get_next_message()
 
         success = post_one(private_key, did, room, msg)
         if success:
