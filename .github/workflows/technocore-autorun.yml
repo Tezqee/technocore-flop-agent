@@ -2,185 +2,143 @@ name: Technocore Auto Runner — Multi Room
 
 on:
   schedule:
-    # lobby     → tiap 3 jam di menit ke-17 (natural, tidak tepat jam)
+    # lobby     → tiap 3 jam di menit ke-17
     - cron: '17 */3 * * *'
     # technocore → tiap 6 jam di menit ke-43
     - cron: '43 */6 * * *'
     # developers → tiap 12 jam di menit ke-31
     - cron: '31 */12 * * *'
   workflow_dispatch:
-    inputs:
-      room:
-        description: 'Room tujuan (lobby / technocore / developers)'
-        required: false
-        default: 'lobby'
+    # Trigger manual → jalankan semua 3 room sekaligus
 
 jobs:
+  # ── Job 1: lobby (tiap 3 jam + manual) ─────────────────────────────────────
   post-lobby:
     name: Post to lobby
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule')
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.2.2
-
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5.3.0
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-python@v5.3.0
         with:
           python-version: '3.12'
           cache: 'pip'
-
       - name: Install dependencies
         run: pip install cryptography==50.0.0
-
-      - name: Human-like random delay
-        run: |
-          DELAY=$((RANDOM % 240 + 30))
-          echo "Waiting ${DELAY}s before posting..."
-          sleep $DELAY
-
+      - name: Random delay
+        run: sleep $((RANDOM % 180 + 10))
       - name: Restore identity.pem
         run: |
           echo "${{ secrets.IDENTITY_PEM_B64 }}" | base64 -d > identity.pem
           chmod 600 identity.pem
-
-      - name: Post to #lobby
+      - name: Post to lobby
         env:
           TECHNOCORE_PASS: ${{ secrets.TECHNOCORE_PASS }}
           PYTHONIOENCODING: utf-8
         run: python auto_runner.py --once --room lobby
-
       - name: Show log
         if: always()
         run: cat auto_runner.log 2>/dev/null || echo "No log"
-
       - name: Cleanup
         if: always()
         run: rm -f identity.pem
 
+  # ── Job 2: technocore (tiap 6 jam + manual) ────────────────────────────────
   post-technocore:
     name: Post to technocore
-    if: github.event_name == 'schedule'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-    # Jalan di jadwal cron ke-2 (tiap 6 jam)
-    # GitHub tidak ada cara native filter cron, jadi pakai needs + conditional
-
     steps:
-      - name: Check if this is the 6h schedule
+      - name: Check schedule
         id: check
         run: |
           MINUTE=$(date -u +%-M)
-          HOUR=$(date -u +%-H)
-          # Menit ke-43 = jadwal technocore
-          if [ "$MINUTE" -ge 40 ] && [ "$MINUTE" -le 46 ]; then
-            echo "should_run=true" >> $GITHUB_OUTPUT
+          # Menit 40-46 = jadwal technocore (cron '43 */6')
+          # Atau manual trigger = selalu jalan
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run=true" >> $GITHUB_OUTPUT
+          elif [ "$MINUTE" -ge 40 ] && [ "$MINUTE" -le 46 ]; then
+            echo "run=true" >> $GITHUB_OUTPUT
           else
-            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "run=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Checkout repository
-        if: steps.check.outputs.should_run == 'true'
-        uses: actions/checkout@v4.2.2
-
-      - name: Set up Python 3.12
-        if: steps.check.outputs.should_run == 'true'
-        uses: actions/setup-python@v5.3.0
+      - uses: actions/checkout@v4.2.2
+        if: steps.check.outputs.run == 'true'
+      - uses: actions/setup-python@v5.3.0
+        if: steps.check.outputs.run == 'true'
         with:
           python-version: '3.12'
           cache: 'pip'
-
       - name: Install dependencies
-        if: steps.check.outputs.should_run == 'true'
+        if: steps.check.outputs.run == 'true'
         run: pip install cryptography==50.0.0
-
-      - name: Human-like random delay
-        if: steps.check.outputs.should_run == 'true'
-        run: |
-          DELAY=$((RANDOM % 180 + 60))
-          echo "Waiting ${DELAY}s..."
-          sleep $DELAY
-
+      - name: Random delay
+        if: steps.check.outputs.run == 'true'
+        run: sleep $((RANDOM % 120 + 30))
       - name: Restore identity.pem
-        if: steps.check.outputs.should_run == 'true'
+        if: steps.check.outputs.run == 'true'
         run: |
           echo "${{ secrets.IDENTITY_PEM_B64 }}" | base64 -d > identity.pem
           chmod 600 identity.pem
-
-      - name: Post to #technocore
-        if: steps.check.outputs.should_run == 'true'
+      - name: Post to technocore
+        if: steps.check.outputs.run == 'true'
         env:
           TECHNOCORE_PASS: ${{ secrets.TECHNOCORE_PASS }}
           PYTHONIOENCODING: utf-8
         run: python auto_runner.py --once --room technocore
-
       - name: Show log
         if: always()
         run: cat auto_runner.log 2>/dev/null || echo "No log"
-
       - name: Cleanup
         if: always()
         run: rm -f identity.pem
 
+  # ── Job 3: developers (tiap 12 jam + manual) ───────────────────────────────
   post-developers:
     name: Post to developers
-    if: github.event_name == 'schedule'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-
     steps:
-      - name: Check if this is the 12h schedule
+      - name: Check schedule
         id: check
         run: |
           MINUTE=$(date -u +%-M)
-          # Menit ke-31 = jadwal developers
-          if [ "$MINUTE" -ge 28 ] && [ "$MINUTE" -le 34 ]; then
-            echo "should_run=true" >> $GITHUB_OUTPUT
+          # Menit 28-34 = jadwal developers (cron '31 */12')
+          # Atau manual trigger = selalu jalan
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run=true" >> $GITHUB_OUTPUT
+          elif [ "$MINUTE" -ge 28 ] && [ "$MINUTE" -le 34 ]; then
+            echo "run=true" >> $GITHUB_OUTPUT
           else
-            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "run=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Checkout repository
-        if: steps.check.outputs.should_run == 'true'
-        uses: actions/checkout@v4.2.2
-
-      - name: Set up Python 3.12
-        if: steps.check.outputs.should_run == 'true'
-        uses: actions/setup-python@v5.3.0
+      - uses: actions/checkout@v4.2.2
+        if: steps.check.outputs.run == 'true'
+      - uses: actions/setup-python@v5.3.0
+        if: steps.check.outputs.run == 'true'
         with:
           python-version: '3.12'
           cache: 'pip'
-
       - name: Install dependencies
-        if: steps.check.outputs.should_run == 'true'
+        if: steps.check.outputs.run == 'true'
         run: pip install cryptography==50.0.0
-
-      - name: Human-like random delay
-        if: steps.check.outputs.should_run == 'true'
-        run: |
-          DELAY=$((RANDOM % 120 + 30))
-          echo "Waiting ${DELAY}s..."
-          sleep $DELAY
-
+      - name: Random delay
+        if: steps.check.outputs.run == 'true'
+        run: sleep $((RANDOM % 90 + 15))
       - name: Restore identity.pem
-        if: steps.check.outputs.should_run == 'true'
+        if: steps.check.outputs.run == 'true'
         run: |
           echo "${{ secrets.IDENTITY_PEM_B64 }}" | base64 -d > identity.pem
           chmod 600 identity.pem
-
-      - name: Post to #developers
-        if: steps.check.outputs.should_run == 'true'
+      - name: Post to developers
+        if: steps.check.outputs.run == 'true'
         env:
           TECHNOCORE_PASS: ${{ secrets.TECHNOCORE_PASS }}
           PYTHONIOENCODING: utf-8
         run: python auto_runner.py --once --room developers
-
       - name: Show log
         if: always()
         run: cat auto_runner.log 2>/dev/null || echo "No log"
-
       - name: Cleanup
         if: always()
         run: rm -f identity.pem
